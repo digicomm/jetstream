@@ -1,0 +1,20 @@
+//
+// Simplebar - https://github.com/Grsmto/simplebar
+// --------------------------------------------------
+
+@import "simplebar/dist/simplebar.css";
+
+// Style overrides
+
+.simplebar-track.simplebar-vertical {
+  width: 7px;
+}
+.simplebar-scrollbar::before {
+  left: 0;
+  right: 0;
+  background: #007961;
+
+  .sidebar-dark #sidebar & {
+    background: #ffffff;
+  }
+}

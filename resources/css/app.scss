@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+[x-cloak] {
+    display: none;
+}
+.fa-secondary{opacity:0.4;}
+
+
+
+@import "custom/loaders";
+@import "custom/charts";
+@import "vendor/simplebar";
+@import "vendor/sweetalert";
+@import "custom/scrollbars";
+
+

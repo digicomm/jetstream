@@ -1,0 +1,19 @@
+// Chart Label Colors
+.chart-label-green {
+  @apply text-green-400/75
+}
+
+.chart-label-yellow {
+  @apply text-yellow-400/75
+}
+.chart-label-blue {
+  @apply text-blue-400/75
+}
+.chart-label-orange {
+  @apply text-orange-400/75
+}
+
+.fix-box {
+  display: unset!important;
+  box-sizing:unset!important;
+}
