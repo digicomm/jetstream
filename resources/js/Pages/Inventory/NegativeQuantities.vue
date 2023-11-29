@@ -1,7 +1,7 @@
 <script setup>
 import AppLayout from '@/js/Layouts/AppLayout.vue';
 import {onMounted, ref} from "vue";
-import * as dtTailwind from '@/js/Plugins/dataTables.tailwindcss';
+
 import {downloadFile, readCookie} from "@/js/Plugins/digismart";
 import BasePageHeading from "@/js/Components/Base/BasePageHeading.vue";
 import '../../../css/dataTables.scss'
@@ -11,6 +11,7 @@ import {useMainStore} from "@/js/Stores/main.js";
 import DCard from "@/js/Components/DCard/DCard.vue";
 import DCardHeadFoot from "@/js/Components/DCard/DCardHeadFoot.vue";
 import DCardBody from "@/js/Components/DCard/DCardBody.vue";
+import DFormInput from "@/js/Components/DForm/DFormInput.vue";
 
 let table
 let dTable
@@ -23,7 +24,6 @@ const store = useMainStore()
 function clearSearch() {
   searchTerm.value = ''
   dTable.search(searchTerm.value).draw()
-
 }
 function performSearch() {
   dTable.search(searchTerm.value).draw()
@@ -173,7 +173,7 @@ let title = ref('Negative Quantities')
               <div class="absolute inset-y-0 left-0 w-7 my-px ml-px flex items-center justify-center pointer-events-none rounded-m text-gray-500">
                 <svg class="hi-mini hi-magnifying-glass inline-block w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd"/></svg>
               </div>
-              <input v-model="searchTerm" type="text" id="search" ref="search" name="search" class="w-full block border placeholder-gray-400 pl-7 pr-3 py-0 leading-6 text-xs rounded-md border-gray-200 focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 dark:bg-gray-900 dark:border-gray-700 dark:focus:border-blue-500 uppercase" placeholder="Search..." @keyup="performSearch" @keyup.esc="clearSearch" aria-autocomplete="none" :disabled="tableLoading">
+              <DFormInput v-model="searchTerm" type="text" id="search" ref="search" size="xs" uppercase placeholder="SEARCH..." input-class="pl-7" @keyup="performSearch" @keyup.esc="clearSearch" autocomplete="none" :disabled="tableLoading"></DFormInput>
             </div>
           </div>
           <div class="flex text-sm" id="header_middle">

@@ -3,7 +3,6 @@ import {onBeforeUnmount, onMounted, ref} from "vue";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {usePage} from "@inertiajs/vue3";
 import {Notification, NotificationGroup, notify} from 'notiwind';
-
 let pusherChannel = ref('')
 const page = usePage()
 const svgList = {
@@ -26,17 +25,15 @@ const titleClass = {
   success: 'text-digicomm-700 dark: text-digicomm-800',
 }
 
-
 onMounted(() => {
   pusherChannel.value = page.props.auth.user.username + '-' + page.props.session
   pusher.subscribe(pusherChannel.value)
   pusher.bind('App\\Events\\UserEvent', (data) => {
-    console.log(data.type)
     notify({
       title: data.title,
       text: data.text,
       type: data.type,
-      group: data.group,
+      group: 'bottom',
     }, 10000)
 
   })
@@ -67,14 +64,16 @@ onBeforeUnmount(() => {
               :key="notification.id"
               class="flex w-full max-w-sm mt-4 overflow-hidden bg-white dark:bg-gray-300 rounded-lg shadow-lg pointer-events-auto ring-1 ring-black ring-opacity-5"
           >
-            <div class="flex justify-center py-2 shrink-0 px-2">
+            <div :class="typeClass[notification.type]" class="flex items-center justify-center shrink-0 w-12">
 
               <font-awesome-icon :icon="['far', svgList[notification.type]]"
-                                 class="w-6 h-6 fill-current" :class="titleClass[notification.type]" ></font-awesome-icon>
+                                 class="w-6 h-6 text-white fill-current"></font-awesome-icon>
             </div>
-            <div class="grow py-1.5">
+            <div class="grow pl-3 py-2 -mx-3">
+              <div class="ml-3">
                 <span :class="titleClass[notification.type]" class="font-semibold">{{ notification.title }}</span>
                 <p class="text-sm text-justify text-gray-600">{{ notification.text }}</p>
+              </div>
             </div>
             <div class="shrink-0 p-1.5">
               <button

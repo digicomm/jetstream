@@ -1,419 +1,201 @@
-<script setup>
-import AppLayout from '@/js/Layouts/AppLayout.vue';
-import {computed, onBeforeMount, onBeforeUnmount, ref} from "vue";
-import BasePageHeading from "@/js/Components/Base/BasePageHeading.vue";
-import {router, usePage} from "@inertiajs/vue3";
-import {Pie} from "vue-chartjs";
-import {Chart, registerables} from "chart.js";
-import ChartDataLabels from "chartjs-plugin-datalabels";
-import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import colors from "tailwindcss/colors";
-import DCardHeadFoot from "@/js/Components/DCard/DCardHeadFoot.vue";
-import DCard from "@/js/Components/DCard/DCard.vue";
-import DRow from "@/js/Components/DRow.vue";
-import DCardBody from "@/js/Components/DCard/DCardBody.vue";
+<script setup lang="ts">
+import { ref } from 'vue'
+import menu from "@/js/Data/menu"
+import {
+  Dialog,
+  DialogPanel,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuItems,
+  TransitionChild,
+  TransitionRoot,
+} from '@headlessui/vue'
+import {
+  Bars3Icon,
+  BellIcon,
+  CalendarIcon,
+  ChartPieIcon,
+  Cog6ToothIcon,
+  DocumentDuplicateIcon,
+  FolderIcon,
+  HomeIcon,
+  UsersIcon,
+  XMarkIcon,
+} from '@heroicons/vue/24/outline'
+import { ChevronDownIcon, MagnifyingGlassIcon } from '@heroicons/vue/20/solid'
+import {useDevice, DeviceSize} from "@/js/Composables/useDevice";
+import BaseNavigationVertical from "@/js/Components/Base/BaseNavigationVertical.vue";
+const device = useDevice();
 
-const page = usePage();
+const navigation = [
+  { name: 'Dashboard', href: '#', icon: HomeIcon, current: true },
+  { name: 'Team', href: '#', current: false },
+  { name: 'Projects', href: '#', icon: FolderIcon, current: false },
+  { name: 'Calendar', href: '#', icon: CalendarIcon, current: false },
+  { name: 'Documents', href: '#', icon: DocumentDuplicateIcon, current: false },
+  { name: 'Reports', href: '#', icon: ChartPieIcon, current: false },
+]
+const teams = [
+  { id: 1, name: 'Heroicons', href: '#', initial: 'H', current: false },
+  { id: 2, name: 'Tailwind Labs', href: '#', initial: 'T', current: false },
+  { id: 3, name: 'Workcation', href: '#', initial: 'W', current: false },
+]
+const userNavigation = [
+  { name: 'Your profile', href: '#' },
+  { name: 'Sign out', href: '#' },
+]
 
-Chart.register(...registerables);
-Chart.defaults.color = "#818d96";
-Chart.defaults.scale.grid.lineWidth = 0;
-Chart.defaults.scale.beginAtZero = true;
-Chart.defaults.datasets.bar.maxBarThickness = 45;
-Chart.defaults.elements.bar.borderRadius = 4;
-Chart.defaults.elements.bar.borderSkipped = false;
-Chart.defaults.elements.point.radius = 0;
-Chart.defaults.elements.point.hoverRadius = 0;
-Chart.defaults.plugins.tooltip.radius = 3;
-Chart.defaults.plugins.legend.labels.boxWidth = 10;
+const sidebarOpen = ref(false)
+const miniSidebar = ref(false)
 
-const colorGreen = convertHex(colors.green["400"])
-const colorGreenTrans = convertHex(colors.green["400"], .75)
-const colorOrange = convertHex(colors.orange["400"])
-const colorOrangeTrans = convertHex(colors.orange["400"], .75)
-const colorYellow = convertHex(colors.yellow["400"])
-const colorYellowTrans = convertHex(colors.yellow["400"], .75)
-const colorBlue = convertHex(colors.blue["400"])
-const colorBlueTrans = convertHex(colors.blue["400"], .75)
-
-
-const chartPlugins = [ChartDataLabels]
-const myStyles = computed(() => {
-  return {
-    height: `${300}px`,
-    position: 'relative'
-  }
-})
-
-
-const openOrdersData = computed(() => ({
-  labels: [
-    'Past',
-    '-2 Weeks',
-    '+2 Weeks',
-    'Future'
-  ],
-  datasets: [{
-    data: page.props.data.openOrders,
-    backgroundColor: [
-      colorOrangeTrans,
-      colorYellowTrans,
-      colorGreenTrans,
-      colorBlueTrans,
-    ],
-    hoverBackgroundColor: [
-      colorOrange,
-      colorYellow,
-      colorGreen,
-      colorBlue,
-    ],
-    borderWidth: 0
-  }]
-}))
-const openOrdersOptions = ref({
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: {
-      display: true,
-      position: 'top'
-    },
-    title: {
-      display: false,
-      text: 'Open Orders',
-      font: {
-        family: "'Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial'",
-        size: 20,
-        weight: 700,
-
-      },
-      color: '#36474d'
-    },
-    datalabels: {
-      color: 'rgb(80, 80, 80)',
-      anchor: 'end',
-      align: 'start',
-      offset: 10,
-      font: {
-        weight: 'bold'
-      }
-    },
-    tooltip: {
-      callbacks: {
-        label: addDollar
-      }
-    }
-  },
-})
-
-const ordersAllocatedData = computed(() => ({
-  labels: [
-    'Complete',
-    'Partial',
-    'Unallocated'
-  ],
-  datasets: [{
-    data: page.props.data.ordersAllocated,
-    backgroundColor: [
-      colorGreenTrans,
-      colorYellowTrans,
-      colorBlueTrans,
-    ],
-    hoverBackgroundColor: [
-      colorGreen,
-      colorYellow,
-      colorBlue,
-    ],
-    borderWidth: 0
-  }]
-}))
-const ordersAllocatedOptions = ref({
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: {
-      display: true,
-      position: 'top'
-    },
-    title: {
-      display: false,
-      text: 'Orders Allocated',
-      font: {
-        family: "'Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial'",
-        size: 20,
-        weight: 700,
-
-      },
-      color: '#36474d'
-    },
-    datalabels: {
-      color: 'rgb(80, 80, 80)',
-      anchor: 'end',
-      align: 'start',
-      offset: 10,
-      font: {
-        weight: 'bold'
-      }
-    }
-  },
-});
-
-const ordersPrintedData = computed(() => ({
-  labels: [
-    'Printed',
-    'Unprinted'
-  ],
-  datasets: [{
-    data: page.props.data.ordersPrinted,
-    backgroundColor: [
-      colorGreenTrans,
-      colorYellowTrans
-    ],
-    hoverBackgroundColor: [
-      colorGreen,
-      colorYellow
-    ],
-    borderWidth: 0
-  }]
-}))
-const ordersPrintedOptions = ref({
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: {
-      display: true,
-      position: 'top'
-    },
-    title: {
-      display: false,
-      text: 'Orders Printed',
-      font: {
-        family: "'Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial'",
-        size: 20,
-        weight: 700,
-
-      },
-      color: '#36474d'
-    },
-    datalabels: {
-      color: 'rgb(80, 80, 80)',
-      anchor: 'end',
-      align: 'start',
-      offset: 10,
-      font: {
-        weight: 'bold'
-      }
-    }
-  },
-})
-
-const updateTimer = setInterval(() => {
-  updateData()
-}, 60000)
-
-onBeforeMount(() => {
-  updateData()
-})
-onBeforeUnmount(() => {
-  clearInterval(updateTimer)
-})
-
-function updateData() {
-  router.post('/', {
-    _method: 'get'
-  }, {
-    only: ['data']
-  })
+function openMiniSidebar() {
+  miniSidebar.value = false
 }
-
-function convertHex(hexCode, opacity = 1) {
-  var hex = hexCode.replace('#', '');
-
-  if (hex.length === 3) {
-    hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
-  }
-
-  var r = parseInt(hex.substring(0, 2), 16),
-      g = parseInt(hex.substring(2, 4), 16),
-      b = parseInt(hex.substring(4, 6), 16);
-
-  /* Backward compatibility for whole number based opacity values. */
-  if (opacity > 1 && opacity <= 100) {
-    opacity = opacity / 100;
-  }
-
-  return 'rgba(' + r + ',' + g + ',' + b + ',' + opacity + ')';
+function closeMiniSidebar() {
+  miniSidebar.value = true
 }
-
-function addDollar(tooltipItem) {
-  switch (tooltipItem.dataIndex) {
-    case 3:
-      return [tooltipItem.label + ': ' + tooltipItem.parsed + ' Orders', page.props.data.future.toLocaleString("en-US", {
-        style: "currency",
-        currency: "USD",
-        maximumFractionDigits: 0
-      })]
-    case 2:
-      return [tooltipItem.label + ': ' + tooltipItem.parsed + ' Orders', page.props.data.twoWeeksFuture.toLocaleString("en-US", {
-        style: "currency",
-        currency: "USD",
-        maximumFractionDigits: 0
-      })]
-    case 1:
-      return [tooltipItem.label + ': ' + tooltipItem.parsed + ' Orders', page.props.data.twoWeeksPast.toLocaleString("en-US", {
-        style: "currency",
-        currency: "USD",
-        maximumFractionDigits: 0
-      })]
-    default:
-      return [tooltipItem.label + ': ' + tooltipItem.parsed + ' Orders', page.props.data.past.toLocaleString("en-US", {
-        style: "currency",
-        currency: "USD",
-        maximumFractionDigits: 0
-      })]
-  }
-}
-
-let title = ref('Dashboard')
 </script>
 
 <template>
+  <div>
+    <TransitionRoot as="template" :show="sidebarOpen">
+      <Dialog as="div" class="relative z-50 lg:hidden" @close="sidebarOpen = false">
+        <TransitionChild as="template" enter="transition-opacity ease-linear duration-300" enter-from="opacity-0" enter-to="opacity-100" leave="transition-opacity ease-linear duration-300" leave-from="opacity-100" leave-to="opacity-0">
+          <div class="fixed inset-0 bg-gray-900/80" />
+        </TransitionChild>
 
-  <AppLayout :title="title" layout="">
-    <BasePageHeading :subtitle="`Welcome ${page.props.auth.user.given_name}, everything looks great.`" :title="title"/>
+        <div class="fixed inset-0 flex">
+          <TransitionChild as="template" enter="transition ease-in-out duration-300 transform" enter-from="-translate-x-full" enter-to="translate-x-0" leave="transition ease-in-out duration-300 transform" leave-from="translate-x-0" leave-to="-translate-x-full">
+            <DialogPanel class="relative mr-16 flex w-full max-w-xs flex-1">
+              <TransitionChild as="template" enter="ease-in-out duration-300" enter-from="opacity-0" enter-to="opacity-100" leave="ease-in-out duration-300" leave-from="opacity-100" leave-to="opacity-0">
+                <div class="absolute left-full top-0 flex w-16 justify-center pt-5">
+                  <button type="button" class="-m-2.5 p-2.5" @click="sidebarOpen = false">
+                    <span class="sr-only">Close sidebar</span>
+                    <XMarkIcon class="h-6 w-6 text-white" aria-hidden="true" />
+                  </button>
+                </div>
+              </TransitionChild>
+              <!-- Sidebar component, swap this element with another sidebar if you like -->
+              <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-digicomm-700 px-6 pb-4">
+                <div class="flex h-16 shrink-0 items-center">
+                  <img class="h-8 w-auto" src="https://tailwindui.com/img/logos/mark.svg?color=white" alt="Your Company" />
+                </div>
+                <nav class="flex flex-1 flex-col">
+                  <ul role="list" class="flex flex-1 flex-col gap-y-7">
+                    <li>
+                      <ul role="list" class="-mx-2 space-y-1">
+                        <li v-for="item in navigation" :key="item.name">
+                          <a :href="item.href" :class="[item.current ? 'bg-digicomm-700 text-white' : 'text-digicomm-600 hover:text-white hover:bg-digicomm-700', 'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold']">
+                            <component :is="item.icon" :class="[item.current ? 'text-white' : 'text-digicomm-200 group-hover:text-white', 'h-6 w-6 shrink-0']" aria-hidden="true" />
+                            {{ item.name }}
+                          </a>
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <div class="text-xs font-semibold leading-6 text-digicomm-200">Your teams</div>
+                      <ul role="list" class="-mx-2 mt-2 space-y-1">
+                        <li v-for="team in teams" :key="team.name">
+                          <a :href="team.href" :class="[team.current ? 'bg-digicomm-700 text-white' : 'text-digicomm-200 hover:text-white hover:bg-digicomm-700', 'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold']">
+                            <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-digicomm-400 bg-digicomm-500 text-[0.625rem] font-medium text-white">{{ team.initial }}</span>
+                            <span class="truncate">{{ team.name }}</span>
+                          </a>
+                        </li>
+                      </ul>
+                    </li>
+                    <li class="mt-auto">
+                      <a href="#" class="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-digicomm-200 hover:bg-digicomm-700 hover:text-white">
+                        <Cog6ToothIcon class="h-6 w-6 shrink-0 text-digicomm-200 group-hover:text-white" aria-hidden="true" />
+                        Settings
+                      </a>
+                    </li>
+                  </ul>
+                </nav>
+              </div>
+            </DialogPanel>
+          </TransitionChild>
+        </div>
+      </Dialog>
+    </TransitionRoot>
 
-    <div class="mx-auto p-4 lg:p-4 w-full">
-      <!--      ADD YOUR MAIN CONTENT BELOW      -->
-      <DRow gap-x="8" md="3" sm="2">
-
-        <!-- Open Orders Card -->
-        <DCard>
-          <DCardHeadFoot title="Open Orders" p-x="3" p-y="2"/>
-          <DCardBody p="2">
-            <Pie :data="openOrdersData" :options="openOrdersOptions" :plugins="chartPlugins" :style="myStyles"/>
-          </DCardBody>
-          <DCardHeadFoot container-class="text-xxs text-center text-gray-600 dark:text-gray-400" p="2">
-            <div v-if="page.props.user.permissions.includes('view dollars')">
-              <font-awesome-icon :icon="['fas','square']" class="chart-label-orange"></font-awesome-icon>
-              {{
-                page.props.data.past.toLocaleString("en-US", {
-                  style: "currency",
-                  currency: "USD",
-                  maximumFractionDigits: 0
-                })
-              }} &nbsp;<font-awesome-icon :icon="['fas','square']" class="chart-label-yellow"></font-awesome-icon>
-              {{
-                page.props.data.twoWeeksPast.toLocaleString("en-US", {
-                  style: "currency",
-                  currency: "USD",
-                  maximumFractionDigits: 0
-                })
-              }} &nbsp;<font-awesome-icon :icon="['fas','square']" class="chart-label-green"></font-awesome-icon>
-              {{
-                page.props.data.twoWeeksFuture.toLocaleString("en-US", {
-                  style: "currency",
-                  currency: "USD",
-                  maximumFractionDigits: 0
-                })
-              }} &nbsp;<font-awesome-icon :icon="['fas','square']" class="chart-label-blue"></font-awesome-icon>
-              {{
-                page.props.data.future.toLocaleString("en-US", {
-                  style: "currency",
-                  currency: "USD",
-                  maximumFractionDigits: 0
-                })
-              }}
-            </div>
-            <div v-else>&nbsp;</div>
-          </DCardHeadFoot>
-        </DCard>
-        <!-- END Open Orders Card -->
-
-
-        <!-- Orders Allocated Card -->
-        <DCard>
-          <DCardHeadFoot title="Orders Allocated" p-x="3" p-y="2"/>
-          <DCardBody p="2">
-            <Pie :data="ordersAllocatedData" :options="ordersAllocatedOptions" :plugins="chartPlugins" :style="myStyles"/>
-          </DCardBody>
-          <DCardHeadFoot container-class="text-xxs text-center text-gray-600 dark:text-gray-400" p="2">
-            <font-awesome-icon :icon="['fas','square']" class="chart-label-green"></font-awesome-icon>
-            {{ page.props.data.ordersAllocated[0] }} &nbsp;<font-awesome-icon :icon="['fas','square']"
-                                                                              class="chart-label-yellow"></font-awesome-icon>
-            {{ page.props.data.ordersAllocated[1] }} &nbsp;<font-awesome-icon :icon="['fas','square']"
-                                                                              class="chart-label-blue"></font-awesome-icon>
-            {{ page.props.data.ordersAllocated[2] }}
-          </DCardHeadFoot>
-        </DCard>
-        <!-- END Orders Allocated Card -->
-
-        <!-- Orders Printed Card -->
-        <DCard>
-          <DCardHeadFoot title="Orders Printed" p-x="3" p-y="2"/>
-          <DCardBody p="2">
-            <Pie :data="ordersPrintedData" :options="ordersPrintedOptions" :plugins="chartPlugins" :style="myStyles"/>
-          </DCardBody>
-          <DCardHeadFoot container-class="text-xxs text-center text-gray-600 dark:text-gray-400" p="2">
-            <div v-if="page.props.user.permissions.includes('view dollars')">
-              <font-awesome-icon :icon="['fas','square']" class="chart-label-green"></font-awesome-icon>
-              {{
-                page.props.data.printed.toLocaleString("en-US", {
-                  style: "currency",
-                  currency: "USD",
-                  maximumFractionDigits: 0
-                })
-              }} &nbsp;<font-awesome-icon :icon="['fas','square']" class="chart-label-yellow"></font-awesome-icon>
-              {{
-                page.props.data.unprinted.toLocaleString("en-US", {
-                  style: "currency",
-                  currency: "USD",
-                  maximumFractionDigits: 0
-                })
-              }}
-            </div>
-            <div v-else>&nbsp;</div>
-          </DCardHeadFoot>
-        </DCard>
-        <!-- END Orders Printed Card -->
-
-        <!-- Orders Shipped Card -->
-        <DCard container-class="self-start md:col-end-4">
-          <DCardHeadFoot title="Orders Shipped" p-x="3" p-y="2"/>
-          <DCardBody container-class="flex" p="2">
-            <dl class="flex flex-col grow space-y-1 py-5 text-center">
-              <dt class="text-3xl font-bold">
-                {{ page.props.data.postedShipments.posted }}
-              </dt>
-              <dd class="font-medium text-gray-500 dark:text-gray-400">
-                Posted
-              </dd>
-            </dl>
-            <dl class="flex flex-col grow space-y-1 py-5 text-center">
-              <dt class="text-3xl font-bold">
-                {{ page.props.data.postedShipments.cancelled }}
-              </dt>
-              <dd class="font-medium text-gray-500 dark:text-gray-400">
-                Cancelled
-              </dd>
-            </dl>
-          </DCardBody>
-          <DCardHeadFoot container-class="text-xxs text-center text-gray-600 dark:text-gray-400" p="2">
-            <div v-if="page.props.user.permissions.includes('view dollars')"><strong>Invoiced</strong> {{
-                page.props.data.invoiced.toLocaleString("en-US", {
-                  style: "currency",
-                  currency: "USD",
-                  maximumFractionDigits: 0
-                })
-              }}
-            </div>
-            <div v-else>&nbsp;</div>
-          </DCardHeadFoot>
-        </DCard>
-        <!-- END Orders Shipped Card -->
-      </DRow>
-
-      <!-- ADD YOUR MAIN CONTENT ABOVE -->
+    <!-- Static sidebar for desktop -->
+    <div class="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:flex-col" :class="[miniSidebar ? 'hidden lg:w-16' : 'hidden lg:w-72']" @mouseover="openMiniSidebar">
+      <!-- Sidebar component, swap this element with another sidebar if you like -->
+      <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-digicomm-700 px-6 pb-4 dark:bg-gray-900" :class="{'overflow-hidden': miniSidebar}">
+        <div class="flex h-16 shrink-0 items-center">
+          <img class="h-8 w-auto" src="https://tailwindui.com/img/logos/mark.svg?color=white" alt="Your Company" />
+        </div>
+        <nav class="flex flex-1 flex-col">
+          <ul role="list" class="flex flex-1 flex-col gap-y-7">
+            <BaseNavigationVertical :nodes="menu.main" :mini-sidebar="miniSidebar"/>
+            <li class="mt-auto">
+              <a href="#" class="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-digicomm-200 hover:bg-digicomm-700 hover:text-white">
+                <Cog6ToothIcon class="h-6 w-6 shrink-0 text-digicomm-200 group-hover:text-white" aria-hidden="true" />
+                Settings
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
     </div>
 
-  </AppLayout>
+    <div class="lg:pl-72">
+      <div class="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+        <button type="button" class="-m-2.5 p-2.5 text-gray-700 lg:hidden" @click="sidebarOpen = true">
+          <span class="sr-only">Open sidebar</span>
+          <Bars3Icon class="h-6 w-6" aria-hidden="true" />
+        </button>
+
+        <!-- Separator -->
+        <div class="h-6 w-px bg-gray-900/10 lg:hidden" aria-hidden="true" />
+
+        <div class="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
+          <form class="relative flex flex-1" action="#" method="GET">
+            <label for="search-field" class="sr-only">Search</label>
+            <MagnifyingGlassIcon class="pointer-events-none absolute inset-y-0 left-0 h-full w-5 text-gray-400" aria-hidden="true" />
+            <input id="search-field" class="block h-full w-full border-0 py-0 pl-8 pr-0 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm" placeholder="Search..." type="search" name="search" />
+          </form>
+          <div class="flex items-center gap-x-4 lg:gap-x-6">
+            <button type="button" class="-m-2.5 p-2.5 text-gray-400 hover:text-gray-500">
+              <span class="sr-only">View notifications</span>
+              <BellIcon class="h-6 w-6" aria-hidden="true" />
+            </button>
+
+            <!-- Separator -->
+            <div class="hidden lg:block lg:h-6 lg:w-px lg:bg-gray-900/10" aria-hidden="true" />
+
+            <!-- Profile dropdown -->
+            <Menu as="div" class="relative">
+              <MenuButton class="-m-1.5 flex items-center p-1.5">
+                <span class="sr-only">Open user menu</span>
+                <img class="h-8 w-8 rounded-full bg-gray-50" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="" />
+                <span class="hidden lg:flex lg:items-center">
+                  <span class="ml-4 text-sm font-semibold leading-6 text-gray-900" aria-hidden="true">Tom Cook</span>
+                  <ChevronDownIcon class="ml-2 h-5 w-5 text-gray-400" aria-hidden="true" />
+                </span>
+              </MenuButton>
+              <transition enter-active-class="transition ease-out duration-100" enter-from-class="transform opacity-0 scale-95" enter-to-class="transform opacity-100 scale-100" leave-active-class="transition ease-in duration-75" leave-from-class="transform opacity-100 scale-100" leave-to-class="transform opacity-0 scale-95">
+                <MenuItems class="absolute right-0 z-10 mt-2.5 w-32 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 focus:outline-none">
+                  <MenuItem v-for="item in userNavigation" :key="item.name" v-slot="{ active }">
+                    <a :href="item.href" :class="[active ? 'bg-gray-50' : '', 'block px-3 py-1 text-sm leading-6 text-gray-900']">{{ item.name }}</a>
+                  </MenuItem>
+                </MenuItems>
+              </transition>
+            </Menu>
+          </div>
+        </div>
+      </div>
+
+      <main class="py-10">
+        <div class="px-4 sm:px-6 lg:px-8">
+          <!-- Your content -->
+        </div>
+      </main>
+    </div>
+  </div>
 </template>
+
+<style scoped>
+
+</style>

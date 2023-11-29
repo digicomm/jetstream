@@ -66,4 +66,4 @@ window.pusher = new Pusher('a15494ac42b53378ba1c', {encrypted: true, cluster: 'u
 import Swal from 'sweetalert2/src/sweetalert2.js'
 window.Swal = Swal
 
-import * as dtTailwind from '@/js/Plugins/dataTables.tailwindcss.js'
+

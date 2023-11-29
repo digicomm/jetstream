@@ -266,14 +266,12 @@ let subtitle = ref('Bin: ')
                 <Combobox v-model="searchTerm" nullable>
                   <div class="relative">
                     <ComboboxInput ref="search"
-                                   class="w-full block border placeholder-gray-400 pl-7 pr-3 py-0 leading-6 text-xs rounded-md border-gray-200 focus:border-digicomm-500 focus:ring focus:ring-digicomm-500 focus:ring-opacity-50 dark:bg-gray-900 dark:border-gray-700 dark:focus:border-digicomm-500 uppercase"
+                                   class="w-full block border placeholder-gray-400 pl-6 pr-2 py-0 leading-6 text-xs rounded-md border-gray-200 focus:border-digicomm-500 focus:ring focus:ring-digicomm-500 focus:ring-opacity-50 dark:bg-gray-900 dark:border-gray-700 dark:focus:border-digicomm-500 uppercase"
                                    placeholder="Search"
                                    @change="searchHandler"/>
-                    <ComboboxButton
-                        class="absolute inset-y-0 left-0 flex items-center pl-1.5 text-gray-500"
-                    >
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-1.5 text-gray-500">
                       <font-awesome-icon :icon="['fal','magnifying-glass']" fixed-width size="xs"></font-awesome-icon>
-                    </ComboboxButton>
+                    </div>
                     <ComboboxButton
                         class="absolute inset-y-0 right-0 flex items-center pr-0.5 text-gray-500"
                     >
@@ -349,7 +347,7 @@ let subtitle = ref('Bin: ')
 
           </div>
         </DCardHeadFoot>
-        <DTableLoading v-if="tableLoading" loading-message="Refreshing Inventory Variance Report"/>
+        <DTableLoading v-if="tableLoading" loading-message="Refreshing Inventory View"/>
       </DCard>
       <!--
 

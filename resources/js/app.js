@@ -6,11 +6,11 @@ import {resolvePageComponent} from 'laravel-vite-plugin/inertia-helpers';
 import {ZiggyVue} from '../../vendor/tightenco/ziggy/dist/vue.m';
 import {createPinia} from 'pinia';
 import Notifications from 'notiwind';
-import './Plugins/tailwind.js';
+import { MotionPlugin } from '@vueuse/motion';
 
 
 import {library} from '@fortawesome/fontawesome-svg-core'
-import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
+import {FontAwesomeIcon, FontAwesomeLayers} from '@fortawesome/vue-fontawesome'
 import {
     faExclamation as farExclamation,
     faInfo as farInfo,
@@ -29,6 +29,10 @@ import {
     faShieldExclamation as farShieldExclamation,
     faSort as farSort,
     faMagnifyingGlass as farMagnifyingGlass,
+    faPlus as farPlus,
+    faMinus as farMinus,
+    faGear as farGear,
+
 
 } from '@fortawesome/pro-regular-svg-icons'
 import {
@@ -40,11 +44,12 @@ import {
 
 import {
     faSquare as fasSquare,
+    faCircleSmall as fasCircleSmall
 
 } from '@fortawesome/pro-solid-svg-icons'
 import {faMicrosoft as fabMicrosoft, faWindows as fabWindows} from '@fortawesome/free-brands-svg-icons'
 
-library.add(farExclamation, farCircleUser, farUser, farWebhook, fabMicrosoft, fabWindows, farInfo, farDoNotEnter, farCheck, farLock, farClock, farChevronDown, farInventory, farTachometer, farChevronLeft, fasSquare, farTimes, farShieldExclamation, farSort, farMagnifyingGlass, falMagnifyingGlass, falSort)
+library.add(farExclamation, farCircleUser, farUser, farWebhook, fabMicrosoft, fabWindows, farInfo, farDoNotEnter, farCheck, farLock, farClock, farChevronDown, farInventory, farTachometer, farChevronLeft, fasSquare, farTimes, farShieldExclamation, farSort, farMagnifyingGlass, falMagnifyingGlass, falSort, farPlus, farMinus, farGear, fasCircleSmall)
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -54,10 +59,12 @@ createInertiaApp({
     setup({el, App, props, plugin}) {
         return createApp({render: () => h(App, props)})
             .component('FontAwesomeIcon', FontAwesomeIcon)
+            .component('FontAwesomeLayers', FontAwesomeLayers)
             .use(plugin)
             .use(ZiggyVue)
             .use(createPinia())
             .use(Notifications)
+            .use(MotionPlugin)
             .mount(el);
     },
     progress: {

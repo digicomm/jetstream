@@ -1,0 +1,13 @@
+[data-theme="test"] {
+
+  table.dataTable {
+    thead > tr > th,table.dataTable > thead > tr > td {
+      @apply px-2 py-1.5 leading-3 border border-gray-200 dark:border-gray-500 text-gray-900 bg-gray-100/75 font-semibold text-left dark:text-gray-50 dark:bg-gray-700/25
+    }
+
+    tbody th, tbody tr {
+      @apply px-2 py-1.5 leading-3 border border-gray-200 dark:border-gray-500
+    }
+  }
+
+}

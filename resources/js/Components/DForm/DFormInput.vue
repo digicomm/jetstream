@@ -7,6 +7,8 @@ import DLabel from "@/js/Components/DLabel.vue";
 import InputError from "@/js/Components/InputError.vue";
 import useInputSizeClass from "@/js/Composables/useInputSizeClass";
 import DInputError from "@/js/Components/DInputError.vue";
+import {upperCase} from "lodash";
+import {onKeyStroke} from "@vueuse/core";
 
 const props = withDefaults(
     defineProps<
@@ -18,10 +20,12 @@ const props = withDefaults(
           type?: InputType
           label?: string
           labelClass?: string
+          inputClass?: string
           autofocus?: boolean
           vError?: boolean
           vErrorMessage?: Array
           formError?: string
+          uppercase?: boolean
         } & CommonInputProps
     >(),
     {
@@ -32,6 +36,7 @@ const props = withDefaults(
       formError: undefined,
       label: undefined,
       labelClass: undefined,
+      inputClass: undefined,
       max: undefined,
       min: undefined,
       step: undefined,
@@ -99,18 +104,22 @@ const computedClasses = computed(() => {
   return [
     'w-full block',
     sizeClass.value,
+      props.inputClass,
     {
       'placeholder-gray-500 rounded-lg border-gray-200 focus:border-digicomm-500 focus:ring focus:ring-digicomm-500 focus:ring-opacity-50 dark:bg-gray-800 dark:border-gray-600 dark:focus:border-digicomm-500 dark:placeholder-gray-400': (!props.plaintext),
       'text-red-600 placeholder-red-400 border-red-400 focus:border-red-500 focus:ring focus:ring-red-500 focus:ring-opacity-50 dark:border-red-400 dark:text-red-400 dark:placeholder-red-400': props.vError,
       'bg-gray-100/75 dark:bg-gray-900/50': disabledBoolean.value,
+      'uppercase': props.uppercase
     },
   ]
 })
 
+
 defineExpose({
-  element: input,
+  input,
   focus,
   blur,
+
 })
 </script>
 
@@ -119,8 +128,9 @@ defineExpose({
   <input
       :id="computedId"
       ref="input"
+      :aria-autocomplete="autocomplete"
       :aria-required="requiredBoolean || undefined"
-      :autocomplete="autocomplete || undefined"
+      :autocomplete="autocomplete === 'none' ? 'off' : autocomplete"
       :autofocus="autofocus"
       :class="computedClasses"
       :disabled="disabledBoolean"
@@ -137,6 +147,7 @@ defineExpose({
       @blur="onBlur($event)"
       @change="onChange($event)"
       @input="onInput($event)"
+      v-bind="$attrs"
   />
   <DInputError :v-messages="vErrorMessage" :form-message="formError"/>
 

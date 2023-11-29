@@ -5,6 +5,8 @@ import colors from 'tailwindcss/colors';
 import aspectRatio from '@tailwindcss/aspect-ratio';
 import forms from '@tailwindcss/forms';
 import typography from '@tailwindcss/typography';
+import headlessui from '@headlessui/tailwindcss';
+
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -23,7 +25,7 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ["Inter", ...defaultTheme.fontFamily.sans],
+                sans: ["Inter Tight", ...defaultTheme.fontFamily.sans],
             },
             fontSize: {
                 xxs: '0.69rem'
@@ -56,13 +58,19 @@ export default {
                 90: 90,
                 100: 100,
             },
+            boxShadow: {
+                glow: '0 0 4px rgb(0 0 0 / 0.1)',
+            },
             opacity: {
-                15: '.15',
-                35: '.35',
-                45: '.45',
-                55: '.55',
-                65: '.65',
-                85: '.85',
+                1: '0.01',
+                2.5: '0.025',
+                7.5: '0.075',
+                15: '0.15',
+                35: '0.35',
+                45: '0.45',
+                55: '0.55',
+                65: '0.65',
+                85: '0.85',
             },
             colors: {
                 'digicomm': {
@@ -96,50 +104,10 @@ export default {
             },
         },
     },
-    daisyui: {
-        themes: [
-            "light",
-            "dark",
-            "cupcake",
-            "bumblebee",
-            "emerald",
-            "corporate",
-            "synthwave",
-            "retro",
-            "cyberpunk",
-            "valentine",
-            "halloween",
-            "garden",
-            "forest",
-            "aqua",
-            "lofi",
-            "pastel",
-            "fantasy",
-            "wireframe",
-            "black",
-            "luxury",
-            "dracula",
-            "cmyk",
-            "autumn",
-            "business",
-            "acid",
-            "lemonade",
-            "night",
-            "coffee",
-            "winter",{
-                "digicomm": {
-                    ...require('daisyui/src/theming/themes')["[data-theme=light]"],
-                    "primary": "#007961",
-
-                }
-            }
-        ],
-    },
     plugins: [
-        require('@headlessui/tailwindcss'),
-        require('daisyui'),
         aspectRatio,
         forms,
+        headlessui,
         typography,
         plugin(function ({addUtilities}) {
             const utilFormSwitch = {
@@ -170,30 +138,28 @@ export default {
 
         }),
     ],
-
     darkMode: ['class', '[data-mode="dark"]'],
     safelist: [
         {
             pattern: /^p(\w?)-/,
-            variants: ['sm','md','lg','xl','2xl','hover']
+            variants: ['sm', 'md', 'lg', 'xl', '2xl', 'hover']
         },
         {
             pattern: /^gap-/,
-            variants: ['sm','md','lg','xl','2xl','hover']
+            variants: ['sm', 'md', 'lg', 'xl', '2xl', 'hover']
         },
         {
             pattern: /^space-/,
-            variants: ['sm','md','lg','xl','2xl','hover']
+            variants: ['sm', 'md', 'lg', 'xl', '2xl', 'hover']
         },
         {
             pattern: /^grid-cols-/,
-            variants: ['sm','md','lg','xl','2xl','hover']
+            variants: ['sm', 'md', 'lg', 'xl', '2xl', 'hover']
         },
         {
             pattern: /^col-span-/,
-            variants: ['sm','md','lg','xl','2xl','hover']
+            variants: ['sm', 'md', 'lg', 'xl', '2xl', 'hover']
         },
     ]
-
 
 };

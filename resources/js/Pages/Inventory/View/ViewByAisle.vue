@@ -9,17 +9,10 @@ import DCardHeadFoot from "@/js/Components/DCard/DCardHeadFoot.vue";
 import DCard from "@/js/Components/DCard/DCard.vue";
 import DCardBody from "@/js/Components/DCard/DCardBody.vue";
 import SimpleBar from "simplebar";
-import {
-  Combobox, ComboboxButton,
-  ComboboxInput,
-  ComboboxOption,
-  ComboboxOptions,
-} from "@headlessui/vue";
+import {Combobox, ComboboxButton, ComboboxInput, ComboboxOption, ComboboxOptions} from "@headlessui/vue";
 import {debounce} from "lodash";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import {swalNotification} from "@/js/Plugins/dialogs.js";
-import DDialog from "@/js/Components/DDialog.vue";
-
+import DFormInput from "@/js/Components/DForm/DFormInput.vue";
 
 let table
 let tableFooter
@@ -28,59 +21,22 @@ let search = ref(null)
 let searchTerm = ref('')
 let printTitle = ref('')
 let tableLoading = ref(false)
-const modalError = ref(null)
 
-const productCodes = ref([])
+const binLocations = ref([])
 const query = ref('')
-
-function searchHandler(event) {
-  query.value = event.target.value
-  if (event.target.value.includes('%')) {
-    productCodes.value = [
-      {"label": "Wildcard Search: " + event.target.value, "value": event.target.value}
-    ]
-    return false
-  }
-  searchDebounceHandler(event)
-}
-
-const searchDebounceHandler = debounce(event => {
-  if (event.target.value.includes('%')) {
-    productCodes.value = [
-      {"label": "Wildcard Search: " + event.target.value, "value": event.target.value}
-    ]
-  } else {
-    axios.post('/autocomplete/productcode', {search: event.target.value})
-        .then((response) => {
-          if (response.data.length) {
-            productCodes.value = response.data
-          } else {
-            productCodes.value = [
-              {
-                'label': 'No Results',
-                'value': '',
-                disabled: true,
-              }
-            ]
-          }
-
-        })
-  }
-
-}, 200)
 
 function clearSearch() {
   searchTerm.value = ''
-  search.value.el.focus()
+  search.value.focus()
 }
 
 function performSearch() {
   if (searchTerm.value === '' || searchTerm.value === null) return false
   dTable.ajax.reload(() => {
-    subtitle.value = 'Product: ' + searchTerm.value.toUpperCase()
+    subtitle.value = 'Bin: ' + searchTerm.value.toUpperCase()
     printTitle.value = searchTerm.value.toUpperCase()
     tableFooter.val('').change()
-    dTable.columns([1, 2]).every(function () {
+    dTable.columns([1, 2, 3]).every(function () {
       var column = this;
       var select = jQuery('<select class="text-xs w-full block border p-0 rounded-md border-gray-200 focus:border-digicomm-500 focus:ring focus:ring-digicomm-500 focus:ring-opacity-50 dark:bg-gray-800 dark:border-gray-600 dark:focus:border-digicomm-500"><option value=""></option></select>')
           .appendTo(jQuery(column.footer()).empty())
@@ -104,18 +60,18 @@ function performSearch() {
 
 function getFileName() {
   const d = new Date()
-  return 'InventoryByProduct_' + printTitle.value + '_' + d.getTime()
+  return 'InventoryByAisle_' + printTitle.value + '_' + d.getTime()
 }
 
 
 onMounted(async () => {
-  search.value.el.focus()
+  search.value.focus()
   table = $('#inventory')
   tableFooter = jQuery('#inventory tfoot select')
   dTable = table.DataTable({
     ajax: function (data, callback) {
       tableLoading.value = true
-      axios.patch(route('inventory.view.update', {view: 'product'}), {search: searchTerm.value})
+      axios.patch(route('inventory.view.update', {view: 'aisle'}), {search: searchTerm.value})
           .then(response => {
             callback(response.data)
             tableLoading.value = false
@@ -143,13 +99,16 @@ onMounted(async () => {
 
     },
     columns: [
+      {data: 'bin_location', className: 'text-nowrap'},
       {data: 'product_code', className: 'text-nowrap'},
-      {data: 'ItemCodeDesc', className: 'text-nowrap'},
+      {data: 'manufacturer', className: 'text-nowrap'},
       {data: 'warehouse_code', className: 'text-nowrap text-center'},
-      {data: 'bin_location', className: 'text-nowrap text-center'},
       {data: 'quantity_on_hand', className: 'text-nowrap text-center'},
       {data: 'quantity_allocated', className: 'text-nowrap text-center'},
       {data: 'quantity_available', className: 'text-nowrap text-center'},
+      {data: 'fifo_lifo', className: 'text-nowrap text-center'},
+      {data: 'last_shipment', className: 'text-nowrap text-center'},
+      {data: 'last_adjustment', className: 'text-nowrap text-center'}
     ],
     buttons: {
       dom: {
@@ -167,12 +126,9 @@ onMounted(async () => {
           titleAttr: 'Export to Excel',
           text: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" class="h-4 fill-current"><path d="M48 448V64c0-8.8 7.2-16 16-16H224v80c0 17.7 14.3 32 32 32h80V448c0 8.8-7.2 16-16 16H64c-8.8 0-16-7.2-16-16zM64 0C28.7 0 0 28.7 0 64V448c0 35.3 28.7 64 64 64H320c35.3 0 64-28.7 64-64V154.5c0-17-6.7-33.3-18.7-45.3L274.7 18.7C262.7 6.7 246.5 0 229.5 0H64zm90.9 233.3c-8.1-10.5-23.2-12.3-33.7-4.2s-12.3 23.2-4.2 33.7L161.6 320l-44.5 57.3c-8.1 10.5-6.3 25.5 4.2 33.7s25.5 6.3 33.7-4.2L192 359.1l37.1 47.6c8.1 10.5 23.2 12.3 33.7 4.2s12.3-23.2 4.2-33.7L222.4 320l44.5-57.3c8.1-10.5 6.3-25.5-4.2-33.7s-25.5-6.3-33.7 4.2L192 280.9l-37.1-47.6z"/></svg>',
           action: () => {
-            downloadFile(route('inventory.view.create', {view: 'product', product: printTitle.value}), getFileName())
+            downloadFile(route('inventory.view.create', {view: 'aisle', aisle: printTitle.value}), getFileName())
                 .catch(response => {
-
-                  swalNotification.fire({
-                    title: response.message
-                  })
+                  Swal.fire(response.message)
                 })
           }
         },
@@ -180,7 +136,7 @@ onMounted(async () => {
           extend: 'print',
           className: '-ml-px inline-flex justify-center items-center space-x-2 border font-semibold px-2 py-1 leading-5 text-xs border-gray-200 bg-white text-gray-500 hover:z-1 hover:border-gray-300 hover:text-digicomm-700 hover:shadow-sm focus:z-1 focus:ring focus:ring-gray-300 focus:ring-opacity-25 active:z-1 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600 dark:focus:ring-opacity-40 dark:active:border-gray-700',
           title: function () {
-            return 'Product Inventory: ' + printTitle.value
+            return 'Aisle Inventory: ' + printTitle.value
           },
           titleAttr: 'Print',
           text: '<svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 512 512" class="h-4 fill-current"><path d="M112 160V64c0-8.8 7.2-16 16-16H357.5c4.2 0 8.3 1.7 11.3 4.7l26.5 26.5c3 3 4.7 7.1 4.7 11.3V160h48V90.5c0-17-6.7-33.3-18.7-45.3L402.7 18.7C390.7 6.7 374.5 0 357.5 0H128C92.7 0 64 28.7 64 64v96h48zm16 208H384v96H128V368zm-16-48c-17.7 0-32 14.3-32 32H48V256c0-8.8 7.2-16 16-16H448c8.8 0 16 7.2 16 16v96H432c0-17.7-14.3-32-32-32H112zm320 80h48c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64V368c0 17.7 14.3 32 32 32H80v80c0 17.7 14.3 32 32 32H400c17.7 0 32-14.3 32-32V400z"/></svg>',
@@ -227,7 +183,7 @@ onMounted(async () => {
       ],
     },
     initComplete: function () {
-      this.api().columns([1, 2]).every(function () {
+      this.api().columns([1, 2, 3]).every(function () {
         var column = this;
         var select = jQuery('<select class="text-xs w-full block border p-0 rounded-md border-gray-200 focus:border-digicomm-500 focus:ring focus:ring-digicomm-500 focus:ring-opacity-50 dark:bg-gray-800 dark:border-gray-600 dark:focus:border-digicomm-500"><option value=""></option></select>')
             .appendTo(jQuery(column.footer()).empty())
@@ -249,26 +205,8 @@ onMounted(async () => {
 
 })
 
-onBeforeUnmount(() => {
-  searchDebounceHandler.cancel()
-})
-
-function logEvent(event) {
-  console.log(event)
-}
-
-const isOpen = ref(true);
-
-const closeModal = () => {
-  isOpen.value = false;
-}
-
-const openModal = () => {
-  isOpen.value = true;
-}
-
 let title = ref('Inventory View')
-let subtitle = ref('Product: ')
+let subtitle = ref('Aisle: ')
 </script>
 
 <template>
@@ -297,39 +235,15 @@ let subtitle = ref('Product: ')
               <form @submit.prevent="performSearch">
 
 
-                <Combobox v-model="searchTerm" nullable>
                   <div class="relative">
-                    <ComboboxInput ref="search"
-                                   class="w-full block border placeholder-gray-400 pl-6 pr-2 py-0 leading-6 text-xs rounded-md border-gray-200 focus:border-digicomm-500 focus:ring focus:ring-digicomm-500 focus:ring-opacity-50 dark:bg-gray-900 dark:border-gray-700 dark:focus:border-digicomm-500 uppercase"
-                                   placeholder="Search"
-                                   @change="searchHandler"/>
-                    <div class="absolute inset-y-0 left-0 flex items-center pl-1.5 text-gray-500">
+                    <div
+                        class="pointer-events-none absolute inset-y-0 left-0 my-px absolute inset-y-0 left-0 flex items-center pl-1.5 text-gray-500"
+                    >
                       <font-awesome-icon :icon="['fal','magnifying-glass']" fixed-width size="xs"></font-awesome-icon>
                     </div>
-                    <ComboboxButton
-                        class="absolute inset-y-0 right-0 flex items-center pr-0.5 text-gray-500"
-                    >
-                      <font-awesome-icon :icon="['fal','sort']" fixed-width size="sm"></font-awesome-icon>
-                    </ComboboxButton>
+
+                    <input v-model="searchTerm" ref="search" aria-expanded="false" type="text" class="w-full block border placeholder-gray-400 pl-6 pr-2 py-0 leading-6 text-xs rounded-md border-gray-200 focus:border-digicomm-500 focus:ring focus:ring-digicomm-500 focus:ring-opacity-50 dark:bg-gray-900 dark:border-gray-700 dark:focus:border-digicomm-500 uppercase" placeholder="Search" aria-labelledby="headlessui-combobox-button-31">
                   </div>
-                  <transition
-                      enter-active-class="transition duration-100 ease-out"
-                      enter-from-class="transform scale-95 opacity-0"
-                      enter-to-class="transform scale-100 opacity-100"
-                      leave-active-class="transition duration-75 ease-out"
-                      leave-from-class="transform scale-100 opacity-100"
-                      leave-to-class="transform scale-95 opacity-0"
-                  >
-                    <ComboboxOptions
-                        class="z-1 absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm dark:bg-gray-800 dark:border-gray-600 dark:focus:border-digicomm-500">
-                      <ComboboxOption v-for="productCode in productCodes" :key="productCode.id"
-                                      :disabled="productCode.disabled === true" :value="productCode.value"
-                                      class="ui-active:bg-digicomm-500/25 ui-disabled:text-gray-500 ui-disabled:bg-inherit">
-                        {{ productCode.label }}
-                      </ComboboxOption>
-                    </ComboboxOptions>
-                  </transition>
-                </Combobox>
               </form>
 
             </div>
@@ -343,17 +257,23 @@ let subtitle = ref('Product: ')
               class="max-w-99p text-xs">
             <thead>
             <tr>
-              <th>Product Code</th>
-              <th>Description</th>
-              <th>WHS</th>
               <th>Bin Location</th>
+              <th>Product Code</th>
+              <th>Manufacturer</th>
+              <th>WHS</th>
               <th>On Hand</th>
               <th>Allocated</th>
               <th>Available</th>
+              <th>FIFO</th>
+              <th>Ship</th>
+              <th>Adj</th>
             </tr>
             </thead>
             <tfoot>
             <tr>
+              <th></th>
+              <th></th>
+              <th></th>
               <th></th>
               <th></th>
               <th></th>
@@ -377,7 +297,6 @@ let subtitle = ref('Product: ')
         </DCardHeadFoot>
         <DTableLoading v-if="tableLoading" loading-message="Refreshing Inventory View"/>
       </DCard>
-
       <!--
 
       ADD YOUR MAIN CONTENT ABOVE
@@ -385,5 +304,6 @@ let subtitle = ref('Product: ')
       -->
     </div>
     <!-- END Page Section -->
+
   </AppLayout>
 </template>

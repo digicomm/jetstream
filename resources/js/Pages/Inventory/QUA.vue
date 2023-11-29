@@ -1,0 +1,408 @@
+<script setup>
+import AppLayout from '@/js/Layouts/AppLayout.vue';
+import {onBeforeMount, onMounted, ref} from "vue";
+import {downloadFile} from "@/js/Plugins/digismart";
+import BasePageHeading from "@/js/Components/Base/BasePageHeading.vue";
+import '../../../css/dataTables.scss'
+import {useMainStore} from "@/js/Stores/main.js";
+import DCard from "@/js/Components/DCard/DCard.vue";
+import DCardHeadFoot from "@/js/Components/DCard/DCardHeadFoot.vue";
+import DCardBody from "@/js/Components/DCard/DCardBody.vue";
+
+
+let dt
+
+const data = ref([])
+function testFunction(something) {
+  console.log(something)
+}
+const columns = [
+  {data: 'product_code', title: 'Product Code'},
+  {data: 'missing', title: 'Missing'},
+  {data: 'qua', title: 'QUA'},
+  {data: 'rma', title: 'RMA'},
+  { data: 'actions', render: function(data, type, row) {
+
+      return '<button onClick="testFunction('+ row.product_code +')">Test</button>';
+    } }
+]
+
+const store = useMainStore()
+
+const table = ref()
+const options = {
+  dom:
+      "<'grid grid-cols-1 md:grid-cols-2'" +
+      "<'self-center'>" +
+      "<'self-center place-self-end'>" +
+      "<'mt-0 mb-2 col-span-2 border border-gray-200 min-w-full bg-white dark:bg-gray-800 dark:border-gray-700'tr>" +
+      "<'self-center'i>" +
+      "<'self-center place-self-end'p>" +
+      ">",
+  paging: false,
+  scrollY: '60vh',
+  scrollX: true,
+  scrollCollapse: true,
+
+  buttons: [
+    {
+      className: 'inline-flex justify-center items-center space-x-2 border font-semibold rounded-l-md px-2 py-1 leading-5 text-xs border-gray-200 bg-white text-gray-500 hover:z-1 hover:border-gray-300 hover:text-digicomm-700 hover:shadow-sm focus:z-1 focus:ring focus:ring-gray-300 focus:ring-opacity-25 active:z-1 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-digicomm-700 dark:focus:ring-gray-600 dark:focus:ring-opacity-40 dark:active:border-gray-700',
+      title: '',
+      titleAttr: 'Export to Excel',
+      text: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" class="h-4 fill-current"><path d="M48 448V64c0-8.8 7.2-16 16-16H224v80c0 17.7 14.3 32 32 32h80V448c0 8.8-7.2 16-16 16H64c-8.8 0-16-7.2-16-16zM64 0C28.7 0 0 28.7 0 64V448c0 35.3 28.7 64 64 64H320c35.3 0 64-28.7 64-64V154.5c0-17-6.7-33.3-18.7-45.3L274.7 18.7C262.7 6.7 246.5 0 229.5 0H64zm90.9 233.3c-8.1-10.5-23.2-12.3-33.7-4.2s-12.3 23.2-4.2 33.7L161.6 320l-44.5 57.3c-8.1 10.5-6.3 25.5 4.2 33.7s25.5 6.3 33.7-4.2L192 359.1l37.1 47.6c8.1 10.5 23.2 12.3 33.7 4.2s12.3-23.2 4.2-33.7L222.4 320l44.5-57.3c8.1-10.5 6.3-25.5-4.2-33.7s-25.5-6.3-33.7 4.2L192 280.9l-37.1-47.6z"/></svg>',
+      action: () => {
+        downloadFile(route('inventory.negativequantities.create'), getFileName())
+      }
+    }, {
+      extend: 'print',
+      className: '-ml-px inline-flex justify-center items-center space-x-2 border font-semibold px-2 py-1 leading-5 text-xs border-gray-200 bg-white text-gray-500 hover:z-1 hover:border-gray-300 hover:text-digicomm-700 hover:shadow-sm focus:z-1 focus:ring focus:ring-gray-300 focus:ring-opacity-25 active:z-1 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600 dark:focus:ring-opacity-40 dark:active:border-gray-700',
+      title: 'Variance Report',
+      titleAttr: 'Print',
+      text: '<svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 512 512" class="h-4 fill-current"><path d="M112 160V64c0-8.8 7.2-16 16-16H357.5c4.2 0 8.3 1.7 11.3 4.7l26.5 26.5c3 3 4.7 7.1 4.7 11.3V160h48V90.5c0-17-6.7-33.3-18.7-45.3L402.7 18.7C390.7 6.7 374.5 0 357.5 0H128C92.7 0 64 28.7 64 64v96h48zm16 208H384v96H128V368zm-16-48c-17.7 0-32 14.3-32 32H48V256c0-8.8 7.2-16 16-16H448c8.8 0 16 7.2 16 16v96H432c0-17.7-14.3-32-32-32H112zm320 80h48c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64V368c0 17.7 14.3 32 32 32H80v80c0 17.7 14.3 32 32 32H400c17.7 0 32-14.3 32-32V400z"/></svg>',
+      customize: function (win) {
+        const css = '@page { size: landscape; } body { -webkit-print-color-adjust:exact !important;\n' +
+            '  print-color-adjust:exact !important;}'
+        const head = win.document.head || win.document.getElementsByTagName('head')[0]
+        const style = win.document.createElement('style')
+
+        let title = win.document.getElementsByTagName('h1')[0]
+        title.classList.add('text-xl', 'font-semibold', 'text-center')
+        let table = win.document.getElementsByTagName('table')[0]
+        table.classList.add('text-xs')
+        let rows = win.document.getElementsByTagName('tr')
+        let cells = win.document.getElementsByTagName('td')
+
+        for (let i = 0; i < rows.length; i++) {
+          rows[i].classList.add('even:bg-gray-100', 'border-b', 'border-gray-200')
+        }
+        for (let i = 0; i < cells.length; i++) {
+          cells[i].classList.add('border', 'border-gray-200', 'leading-3')
+        }
+
+        style.type = 'text/css';
+        style.media = 'print';
+        if (style.styleSheet) {
+          style.styleSheet.cssText = css;
+        } else {
+          style.appendChild(win.document.createTextNode(css));
+        }
+        head.appendChild(style);
+      }
+    }, {
+      className: '-ml-px inline-flex justify-center items-center space-x-2 border font-semibold rounded-r-md px-2 py-1 leading-5 text-xs border-gray-200 bg-white text-gray-500 hover:z-1 hover:border-gray-300 hover:text-digicomm-700 hover:shadow-sm focus:z-1 focus:ring focus:ring-gray-300 focus:ring-opacity-25 active:z-1 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600 dark:focus:ring-opacity-40 dark:active:border-gray-700',
+      text: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="h-4 fill-current"><path d="M496 200c0 13.3-10.7 24-24 24h0H360 328c-13.3 0-24-10.7-24-24s10.7-24 24-24h32 54.1l-52.1-52.1C333.8 95.8 295.7 80 256 80c-72.7 0-135.2 44.1-162 107.1c-5.2 12.2-19.3 17.9-31.5 12.7s-17.9-19.3-12.7-31.5C83.9 88.2 163.4 32 256 32c52.5 0 102.8 20.8 139.9 57.9L448 142.1V88l0-.4V56c0-13.3 10.7-24 24-24s24 10.7 24 24V200zM40 288H152c13.3 0 24 10.7 24 24s-10.7 24-24 24H97.9l52.1 52.1C178.2 416.2 216.3 432 256 432c72.6 0 135-43.9 161.9-106.8c5.2-12.2 19.3-17.8 31.5-12.6s17.8 19.3 12.6 31.5C427.8 424 348.5 480 256 480c-52.5 0-102.8-20.8-139.9-57.9L64 369.9V424c0 13.3-10.7 24-24 24s-24-10.7-24-24V312c0-13.3 10.7-24 24-24z"/></svg>',
+      titleAttr: 'Refresh Data',
+      action: () => {
+        dt.ajax.reload()
+      }
+    }
+  ],
+
+}
+
+onBeforeMount(() => {
+  axios.get('/inventory/qua/create')
+      .then(result => {
+            data.value = result.data
+          }
+      )
+
+})
+onMounted(() => {
+
+
+
+})
+let title = ref('Negative Quantities')
+</script>
+
+<template>
+
+  <AppLayout :title="title" layout="">
+    <BasePageHeading :title="title"></BasePageHeading>
+    <div class="mx-auto p-4 lg:p-4 w-full">
+      <!--
+
+      ADD YOUR MAIN CONTENT BELOW
+
+      -->
+
+
+      <DCard container-class="relative">
+        <DCardHeadFoot p="2" table-actions>
+          ff
+        </DCardHeadFoot>
+        <DCardBody p="0">
+
+          <!-- Tables: With Sorting Buttons -->
+          <!-- Responsive Table Container -->
+          <div
+              class="min-w-full overflow-x-auto bg-white dark:border-gray-700 dark:bg-gray-800"
+          >
+            <!-- Table -->
+            <table class="min-w-full whitespace-nowrap align-middle text-sm">
+              <!-- Table Header -->
+              <thead>
+              <tr>
+                <th
+                    class="group bg-gray-100/75 px-3 py-4 text-left font-semibold text-gray-900 dark:bg-gray-700/25 dark:text-gray-50"
+                >
+                  <div class="inline-flex items-center gap-2">
+                    <span>Name</span>
+                    <button
+                        type="button"
+                        class="inline-flex items-center justify-center space-x-2 rounded-lg border border-gray-200 bg-white px-1.5 py-1 text-sm font-semibold leading-5 text-gray-800 transition hover:border-gray-300 hover:text-gray-900 hover:shadow-sm focus:ring focus:ring-gray-300 focus:ring-opacity-25 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600 dark:focus:ring-opacity-40 dark:active:border-gray-700"
+                    >
+                      <svg
+                          class="hi-mini hi-chevron-down inline-block h-4 w-4"
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                          aria-hidden="true"
+                      >
+                        <path
+                            fill-rule="evenodd"
+                            d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                            clip-rule="evenodd"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </th>
+                <th
+                    class="group bg-gray-100/75 px-3 py-4 text-left font-semibold text-gray-900 dark:bg-gray-700/25 dark:text-gray-50"
+                >
+                  <div class="inline-flex items-center gap-2">
+                    <span>Email</span>
+                    <button
+                        type="button"
+                        class="inline-flex items-center justify-center space-x-2 rounded-lg border border-gray-200 bg-white px-1.5 py-1 text-sm font-semibold leading-5 text-gray-800 opacity-25 transition hover:border-gray-300 hover:text-gray-900 hover:shadow-sm focus:ring focus:ring-gray-300 focus:ring-opacity-25 active:border-gray-200 active:shadow-none group-hover:opacity-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600 dark:focus:ring-opacity-40 dark:active:border-gray-700"
+                    >
+                      <svg
+                          class="hi-mini hi-chevron-up-down inline-block h-4 w-4"
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                          aria-hidden="true"
+                      >
+                        <path
+                            fill-rule="evenodd"
+                            d="M10 3a.75.75 0 01.55.24l3.25 3.5a.75.75 0 11-1.1 1.02L10 4.852 7.3 7.76a.75.75 0 01-1.1-1.02l3.25-3.5A.75.75 0 0110 3zm-3.76 9.2a.75.75 0 011.06.04l2.7 2.908 2.7-2.908a.75.75 0 111.1 1.02l-3.25 3.5a.75.75 0 01-1.1 0l-3.25-3.5a.75.75 0 01.04-1.06z"
+                            clip-rule="evenodd"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </th>
+                <th
+                    class="group bg-gray-100/75 px-3 py-4 text-left font-semibold text-gray-900 dark:bg-gray-700/25 dark:text-gray-50"
+                >
+                  <div class="inline-flex items-center gap-2">
+                    <span>Plan</span>
+                    <button
+                        type="button"
+                        class="inline-flex items-center justify-center space-x-2 rounded-lg border border-gray-200 bg-white px-1.5 py-1 text-sm font-semibold leading-5 text-gray-800 opacity-25 transition hover:border-gray-300 hover:text-gray-900 hover:shadow-sm focus:ring focus:ring-gray-300 focus:ring-opacity-25 active:border-gray-200 active:shadow-none group-hover:opacity-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600 dark:focus:ring-opacity-40 dark:active:border-gray-700"
+                    >
+                      <svg
+                          class="hi-mini hi-chevron-up-down inline-block h-4 w-4"
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                          aria-hidden="true"
+                      >
+                        <path
+                            fill-rule="evenodd"
+                            d="M10 3a.75.75 0 01.55.24l3.25 3.5a.75.75 0 11-1.1 1.02L10 4.852 7.3 7.76a.75.75 0 01-1.1-1.02l3.25-3.5A.75.75 0 0110 3zm-3.76 9.2a.75.75 0 011.06.04l2.7 2.908 2.7-2.908a.75.75 0 111.1 1.02l-3.25 3.5a.75.75 0 01-1.1 0l-3.25-3.5a.75.75 0 01.04-1.06z"
+                            clip-rule="evenodd"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </th>
+                <th
+                    class="group bg-gray-100/75 px-3 py-4 text-right font-semibold text-gray-900 dark:bg-gray-700/25 dark:text-gray-50"
+                >
+                  <div class="inline-flex items-center gap-2">
+                    <button
+                        type="button"
+                        class="inline-flex items-center justify-center space-x-2 rounded-lg border border-gray-200 bg-white px-1.5 py-1 text-sm font-semibold leading-5 text-gray-800 opacity-25 transition hover:border-gray-300 hover:text-gray-900 hover:shadow-sm focus:ring focus:ring-gray-300 focus:ring-opacity-25 active:border-gray-200 active:shadow-none group-hover:opacity-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600 dark:focus:ring-opacity-40 dark:active:border-gray-700"
+                    >
+                      <svg
+                          class="hi-mini hi-chevron-up-down inline-block h-4 w-4"
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                          aria-hidden="true"
+                      >
+                        <path
+                            fill-rule="evenodd"
+                            d="M10 3a.75.75 0 01.55.24l3.25 3.5a.75.75 0 11-1.1 1.02L10 4.852 7.3 7.76a.75.75 0 01-1.1-1.02l3.25-3.5A.75.75 0 0110 3zm-3.76 9.2a.75.75 0 011.06.04l2.7 2.908 2.7-2.908a.75.75 0 111.1 1.02l-3.25 3.5a.75.75 0 01-1.1 0l-3.25-3.5a.75.75 0 01.04-1.06z"
+                            clip-rule="evenodd"
+                        />
+                      </svg>
+                    </button>
+                    <span>MMR</span>
+                  </div>
+                </th>
+                <th
+                    class="group bg-gray-100/75 px-3 py-4 text-center font-semibold text-gray-900 dark:bg-gray-700/25 dark:text-gray-50"
+                >
+                  <span>Actions</span>
+                </th>
+              </tr>
+              </thead>
+              <!-- END Table Header -->
+
+              <!-- Table Body -->
+              <tbody>
+              <tr class="even:bg-gray-50 dark:even:bg-gray-900/50">
+                <td class="p-1">
+                  <p class="font-medium">Nansi Hart</p>
+                </td>
+                <td class="p-1 text-gray-500 dark:text-gray-400">
+                  n.hart@example.com
+                </td>
+                <td class="p-1">
+                  <div
+                      class="inline-flex rounded-full border border-transparent bg-emerald-100 px-2 py-1 text-xs font-semibold leading-4 text-emerald-900 dark:border-emerald-900 dark:bg-emerald-700 dark:bg-opacity-10 dark:font-medium dark:text-emerald-200"
+                  >
+                    Agency
+                  </div>
+                </td>
+                <td class="p-1 text-right">$49,00</td>
+                <td class="p-1 text-center">
+                  <button
+                      type="button"
+                      class="inline-flex items-center justify-center space-x-2 rounded-lg border border-gray-200 bg-white px-2 py-1 text-sm font-semibold leading-5 text-gray-800 hover:border-gray-300 hover:text-gray-900 hover:shadow-sm focus:ring focus:ring-gray-300 focus:ring-opacity-25 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600 dark:focus:ring-opacity-40 dark:active:border-gray-700"
+                  >
+                    Edit
+                  </button>
+                </td>
+              </tr>
+              <tr class="even:bg-gray-50 dark:even:bg-gray-900/50">
+                <td class="p-1">
+                  <p class="font-medium">Lia Baker</p>
+                </td>
+                <td class="p-1 text-gray-500 dark:text-gray-400">
+                  l.baker@example.com
+                </td>
+                <td class="p-1">
+                  <div
+                      class="inline-flex rounded-full border border-transparent bg-blue-100 px-2 py-1 text-xs font-semibold leading-4 text-blue-900 dark:border-blue-900 dark:border-opacity-75 dark:bg-blue-700 dark:bg-opacity-10 dark:font-medium dark:text-blue-200"
+                  >
+                    Freelancer
+                  </div>
+                </td>
+                <td class="p-1 text-right">$19,00</td>
+                <td class="p-1 text-center">
+                  <button
+                      type="button"
+                      class="inline-flex items-center justify-center space-x-2 rounded-lg border border-gray-200 bg-white px-2 py-1 text-sm font-semibold leading-5 text-gray-800 hover:border-gray-300 hover:text-gray-900 hover:shadow-sm focus:ring focus:ring-gray-300 focus:ring-opacity-25 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600 dark:focus:ring-opacity-40 dark:active:border-gray-700"
+                  >
+                    Edit
+                  </button>
+                </td>
+              </tr>
+              <tr class="even:bg-gray-50 dark:even:bg-gray-900/50">
+                <td class="p-1">
+                  <p class="font-medium">Xavier Rosales</p>
+                </td>
+                <td class="p-1 text-gray-500 dark:text-gray-400">
+                  x.rosales@example.com
+                </td>
+                <td class="p-1">
+                  <div
+                      class="inline-flex rounded-full border border-transparent bg-orange-100 px-2 py-1 text-xs font-semibold leading-4 text-orange-900 dark:border-orange-900 dark:border-opacity-75 dark:bg-orange-700 dark:bg-opacity-10 dark:font-medium dark:text-orange-200"
+                  >
+                    Trial
+                  </div>
+                </td>
+                <td class="p-1 text-right">$0,00</td>
+                <td class="p-1 text-center">
+                  <button
+                      type="button"
+                      class="inline-flex items-center justify-center space-x-2 rounded-lg border border-gray-200 bg-white px-2 py-1 text-sm font-semibold leading-5 text-gray-800 hover:border-gray-300 hover:text-gray-900 hover:shadow-sm focus:ring focus:ring-gray-300 focus:ring-opacity-25 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600 dark:focus:ring-opacity-40 dark:active:border-gray-700"
+                  >
+                    Edit
+                  </button>
+                </td>
+              </tr>
+              <tr class="even:bg-gray-50 dark:even:bg-gray-900/50">
+                <td class="p-1">
+                  <p class="font-medium">Danyal Clark</p>
+                </td>
+                <td class="p-1 text-gray-500 dark:text-gray-400">
+                  d.clark@example.com
+                </td>
+                <td class="p-1">
+                  <div
+                      class="inline-flex rounded-full border border-transparent bg-emerald-100 px-2 py-1 text-xs font-semibold leading-4 text-emerald-900 dark:border-emerald-900 dark:bg-emerald-700 dark:bg-opacity-10 dark:font-medium dark:text-emerald-200"
+                  >
+                    Agency
+                  </div>
+                </td>
+                <td class="p-1 text-right">$49,00</td>
+                <td class="p-1 text-center">
+                  <button
+                      type="button"
+                      class="inline-flex items-center justify-center space-x-2 rounded-lg border border-gray-200 bg-white px-2 py-1 text-sm font-semibold leading-5 text-gray-800 hover:border-gray-300 hover:text-gray-900 hover:shadow-sm focus:ring focus:ring-gray-300 focus:ring-opacity-25 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600 dark:focus:ring-opacity-40 dark:active:border-gray-700"
+                  >
+                    Edit
+                  </button>
+                </td>
+              </tr>
+              <tr class="even:bg-gray-50 dark:even:bg-gray-900/50">
+                <td class="p-1">
+                  <p class="font-medium">Keira Simons</p>
+                </td>
+                <td class="p-1 text-gray-500 dark:text-gray-400">
+                  k.simons@example.com
+                </td>
+                <td class="p-1">
+                  <div
+                      class="inline-flex rounded-full border border-transparent bg-blue-100 px-2 py-1 text-xs font-semibold leading-4 text-blue-900 dark:border-blue-900 dark:border-opacity-75 dark:bg-blue-700 dark:bg-opacity-10 dark:font-medium dark:text-blue-200"
+                  >
+                    Freelancer
+                  </div>
+                </td>
+                <td class="p-1 text-right">$19,00</td>
+                <td class="p-1 text-center">
+                  <button
+                      type="button"
+                      class="inline-flex items-center justify-center space-x-2 rounded-lg border border-gray-200 bg-white px-2 py-1 text-sm font-semibold leading-5 text-gray-800 hover:border-gray-300 hover:text-gray-900 hover:shadow-sm focus:ring focus:ring-gray-300 focus:ring-opacity-25 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600 dark:focus:ring-opacity-40 dark:active:border-gray-700"
+                  >
+                    Edit
+                  </button>
+                </td>
+              </tr>
+              </tbody>
+              <!-- END Table Body -->
+            </table>
+            <!-- END Table -->
+          </div>
+          <!-- END Responsive Table Container -->
+          <!-- END Tables: With Sorting Buttons -->
+        </DCardBody>
+        <DCardHeadFoot p-x="2" p-y="1">
+          <div id="footer_start" class="flex text-xs">
+          </div>
+          <div id="footer_center" class="flex text-sm">
+
+          </div>
+          <div id="footer_end" class="flex items-center gap-2">
+
+          </div>
+        </DCardHeadFoot>
+
+      </DCard>
+
+      <!--
+
+      ADD YOUR MAIN CONTENT ABOVE
+
+      -->
+    </div>
+    <!-- END Page Section -->
+
+  </AppLayout>
+</template>

@@ -31,6 +31,7 @@ Route::middleware(['auth:sanctum',config('jetstream.auth_session'),'verified',])
         Route::resource('negativequantities', \App\Http\Controllers\IN_NegativeQuantitiesController::class, ['as' => 'inventory']);
         Route::resource('variancereport', \App\Http\Controllers\IN_VarianceReportController::class, ['as' => 'inventory']);
         Route::resource('view', \App\Http\Controllers\IN_ViewByController::class, ['as' => 'inventory']);
+        Route::resource('qua', \App\Http\Controllers\IN_QUAController::class, ['as' => 'inventory']);
     });
 
 

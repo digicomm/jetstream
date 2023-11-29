@@ -15,7 +15,8 @@ $.extend( true, DataTable.defaults, {
         "<'self-center'i>" +
         "<'self-center place-self-end'p>" +
         ">",
-    renderer: 'tailwindcss'
+    renderer: 'tailwindcss',
+    sWrapper: 'dataTables_wrapper dt-tailwindcss'
 } );
 
 

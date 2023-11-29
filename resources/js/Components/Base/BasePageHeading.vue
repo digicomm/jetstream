@@ -34,7 +34,7 @@ defineProps({
     </h2>
 
     <h2 v-else class="text-2xl font-bold py-2">
-      <span class="items-center space-x-2">
+      <span class="items-center" :class="icon ? 'space-x-2' : ''">
         <font-awesome-icon v-if="icon" :icon="icon" class="inline-block w-6 h-6 opacity-50"/>
       <span>{{ title }}</span>
       <span v-if="subtitle" class="block font-medium text-lg text-gray-600 dark:text-gray-400">{{ subtitle }}</span>

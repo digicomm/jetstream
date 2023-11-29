@@ -64,7 +64,7 @@ const computedSizes = computed(() =>
             : undefined
 )
 
-const computedDimentions = computed<{height: number | undefined; width: number | undefined}>(() => {
+const computedDimensions = computed<{height: number | undefined; width: number | undefined}>(() => {
   const width = Number.isNaN(widthNumber.value) ? undefined : widthNumber.value
   const height = Number.isNaN(heightNumber.value) ? undefined : heightNumber.value
   if (blankBoolean.value) {
@@ -85,7 +85,7 @@ const computedDimentions = computed<{height: number | undefined; width: number |
 })
 
 const computedBlankImgSrc = computed(() =>
-    makeBlankImgSrc(computedDimentions.value.width, computedDimentions.value.height, props.blankColor)
+    makeBlankImgSrc(computedDimensions.value.width, computedDimensions.value.height, props.blankColor)
 )
 
 const alignment = computed(() =>
@@ -127,12 +127,12 @@ const makeBlankImgSrc = (
   <img
       alt=""
       :class="computedClasses"
-      :height="computedDimentions.height || undefined"
+      :height="computedDimensions.height || undefined"
       :loading="lazyBoolean ? 'lazy' : 'eager'"
       :sizes="!blankBoolean ? computedSizes : undefined"
       :src="!blankBoolean ? props.src : computedBlankImgSrc"
       :srcset="!blankBoolean ? computedSrcset : undefined"
-      :width="computedDimentions.width || undefined"
+      :width="computedDimensions.width || undefined"
   />
 </template>
 
